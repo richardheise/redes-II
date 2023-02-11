@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #define TAMFILA        5
 #define ERROR_CLINE   -1
@@ -76,11 +77,17 @@ int main ( int argc, char *argv[] ) {
 		exit (ERROR_NOBIND);
 	}		
 
+
 	char *received = malloc(sz * sizeof(char));
 	if (!received){
 		puts ("Couldn't allocate array of received messages");
 		exit (ERROR_ALLOC);
 	}
+
+	struct timeval tv;
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+    setsockopt(send_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
     while (1) {
         memset(buf, 0, BUFSIZ);
@@ -88,6 +95,10 @@ int main ( int argc, char *argv[] ) {
 
         puts("Awaiting message.");
         recvfrom(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, &szisa);
+		if (errno == EWOULDBLOCK){
+			printf("Server Timeout.\n");
+			break;
+		}
         printf("I'm the server, just received a message ----> %s\n", buf);
 
 		// registra mensagem recebida
@@ -98,6 +109,12 @@ int main ( int argc, char *argv[] ) {
 
         sendto(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, szisa);
 	}
+
+	unsigned int total = 0;
+	for (int i = 1; i < sz; ++i)
+		total += received[i];
+	
+	printf("I received a total of %d messages\n", total);
 
 	free(received);
 	return 0;
