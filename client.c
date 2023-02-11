@@ -16,7 +16,7 @@
 #define ERROR_OPENSCKT -3
 #define ERROR_SENDATA -4
 
-main(int argc, char *argv[]) { 
+void main(int argc, char *argv[]) { 
 
     int socket_description;
     int number_recv_bytes;
