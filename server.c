@@ -89,6 +89,9 @@ int main ( int argc, char *argv[] ) {
     tv.tv_usec = 0;
     setsockopt(send_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
+
+	unsigned int out_of_order = 0;
+	unsigned int expected_msg = 1;
     while (1) {
         memset(buf, 0, BUFSIZ);
         int szisa = sizeof(isa); 
@@ -107,6 +110,11 @@ int main ( int argc, char *argv[] ) {
 			received = double_array_size(received, &sz);
 		received[num_message] = 1;
 
+		if (expected_msg != num_message){
+			printf("Out of order message! Message number %d came before message %d\n", num_message, expected_msg);
+			out_of_order++;
+		} 
+		expected_msg = num_message+1;
         sendto(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, szisa);
 	}
 
@@ -115,6 +123,7 @@ int main ( int argc, char *argv[] ) {
 		total += received[i];
 	
 	printf("I received a total of %d messages\n", total);
+	printf("Out of order messages: %d\n", out_of_order);
 
 	free(received);
 	return 0;
