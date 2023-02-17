@@ -52,7 +52,7 @@ void main(int argc, char *argv[]) {
 
     char data[10] = {0};
 
-    for (int i = num_message; i > 0; i--) {
+    for (int i = 0; i < num_message; i++) {
         memset(buf, 0, BUFSIZ+1);
 
         sprintf(data, "%d ", i);
@@ -64,10 +64,9 @@ void main(int argc, char *argv[]) {
         }
 
         int szsa = sizeof(sa);
-        int recvres = recvfrom(socket_description, buf, BUFSIZ, 0, (struct sockaddr *) &sa, &szsa);
-        printf("I'm the client, just received %d, data: %s\n", recvres, buf);
+        // int recvres = recvfrom(socket_description, buf, BUFSIZ, 0, (struct sockaddr *) &sa, &szsa);
+        // printf("I'm the client, just received %d, data: %s\n", recvres, buf);
     }
-/* end while }*/
 
    
     close(socket_description);

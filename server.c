@@ -93,8 +93,8 @@ int main ( int argc, char *argv[] ) {
 
 	unsigned int out_of_order = 0;
 	unsigned int expected_msg = 1;
-    while (1) {
         memset(buf, 0, BUFSIZ);
+    while (1) {
         int szisa = sizeof(isa); 
 
         puts("Awaiting message.");
