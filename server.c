@@ -135,7 +135,7 @@ int main ( int argc, char *argv[] ) {
 			while (i < sz && !received[i])
 				i++;
 			if (i == sz) break;
-			printf("From %d to %d\n", begin, i);
+			printf("Interval [%d .. %d] missing\n", begin, i-1);
 		} else 
 			highest = i;		
 		total += received[i];
