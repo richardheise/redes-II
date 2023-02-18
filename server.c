@@ -46,7 +46,7 @@ int main ( int argc, char *argv[] ) {
 	struct sockaddr_in sa, isa;  /* sa: server, isa: client */
 	struct hostent *hp;
 	char localhost[MAXHOSTNAME];
-	size_t sz = 2;
+	size_t sz = 1024;
 
     if (argc != 2) {
         puts("Correct use: server <port>");
@@ -111,21 +111,19 @@ int main ( int argc, char *argv[] ) {
 			received = double_array_size(received, &sz);
 		received[num_message] = 1;
 
-		if (num_message > expected_msg){
+		if (num_message < expected_msg){
 			printf("Out of order message! Message number %d came before message %d\n", num_message, expected_msg);
 			out_of_order++;
 		}
 		if (num_message+1 > expected_msg) 
 			expected_msg = num_message+1;
 
-        sendto(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, szisa);
+        // sendto(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, szisa);
 	}
 
 	unsigned int total = 0;
-	for (int i = 1; i < sz; ++i){
+	for (int i = 1; i < sz; ++i)
 		total += received[i];
-		if (received[i]) printf("%d %d\n", received[i], i);
-	}
 	
 	printf("I received a total of %d messages\n", total);
 	printf("Out of order messages: %d\n", out_of_order);

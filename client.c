@@ -52,7 +52,7 @@ void main(int argc, char *argv[]) {
 
     char data[10] = {0};
 
-    for (int i = 0; i < num_message; i++) {
+    for (int i = 1; i <= num_message; i++) {
         memset(buf, 0, BUFSIZ+1);
 
         sprintf(data, "%d ", i);
