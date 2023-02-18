@@ -115,16 +115,36 @@ int main ( int argc, char *argv[] ) {
 			printf("Out of order message! Message number %d came before message %d\n", num_message, expected_msg);
 			out_of_order++;
 		}
-		if (num_message+1 > expected_msg) 
-			expected_msg = num_message+1;
+		expected_msg = num_message+1;
 
         // sendto(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, szisa);
 	}
 
+	printf("========== FINAL REPORT ==========\n");
+	printf("-------- Missing Messages --------\n");
+
+
 	unsigned int total = 0;
-	for (int i = 1; i < sz; ++i)
+	unsigned int begin;
+	unsigned int highest = 0;
+	i = 1;
+	while (i < sz){
+
+		if (!received[i]){
+			begin = i;
+			while (i < sz && !received[i])
+				i++;
+			if (i == sz) break;
+			printf("From %d to %d\n", begin, i);
+		} else 
+			highest = i;		
 		total += received[i];
+		i++;
+	}
+	printf("Highest message received: %d\n", highest);
 	
+	printf("----------------------------------\n");
+
 	printf("I received a total of %d messages\n", total);
 	printf("Out of order messages: %d\n", out_of_order);
 
