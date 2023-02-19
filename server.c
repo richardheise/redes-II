@@ -151,9 +151,9 @@ int main ( int argc, char *argv[] ) {
 
 			last_ts = received[i];
 			last_msg = i;
+			highest = i;
+			total_received++;
 		}
-		highest = i;
-		total_received++;
 		i++;
 	}
 	
