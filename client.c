@@ -16,16 +16,14 @@
 #define ERROR_OPENSCKT -3
 #define ERROR_SENDATA -4
 
-void main(int argc, char *argv[]) { 
+int main(int argc, char *argv[]) { 
 
     int socket_description;
-    int number_recv_bytes;
+    // int number_recv_bytes;
     struct sockaddr_in sa;
     struct hostent *hp;
     char buf[BUFSIZ+1];
     char *host;
-
-    unsigned int i;
 
     if(argc != 4) {
       puts("Correct usage: <client> <server-name> <port> <data>");
@@ -63,12 +61,12 @@ void main(int argc, char *argv[]) {
             exit(ERROR_SENDATA);
         }
 
-        int szsa = sizeof(sa);
+        // int szsa = sizeof(sa);
         // int recvres = recvfrom(socket_description, buf, BUFSIZ, 0, (struct sockaddr *) &sa, &szsa);
         // printf("I'm the client, just received %d, data: %s\n", recvres, buf);
     }
 
    
     close(socket_description);
-    exit(0);
+    return 0;
 }

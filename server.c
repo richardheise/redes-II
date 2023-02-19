@@ -21,11 +21,11 @@
 #define ERROR_ALLOC   -5
 #define MAXHOSTNAME   30
 
-char *double_array_size(char *received, size_t *sz){
-	char *auxptr;
+unsigned int *double_array_size(unsigned int *received, size_t *sz){
+	unsigned int *auxptr;
 
 	// tenta realocar vetor e colocar no vetor auxiliar
-	auxptr = realloc(received, (*sz)*2 * sizeof(char));
+	auxptr = realloc(received, (*sz)*2 * sizeof(unsigned int));
 	if (!auxptr){
 		puts ("Couldn't reallocate array of received messages");
 		free(received);
@@ -33,14 +33,14 @@ char *double_array_size(char *received, size_t *sz){
 	}
 
 	// seta novos bits para 0
-	memset(auxptr+(*sz), 0, (*sz)*sizeof(char)); 
+	memset(auxptr+(*sz), 0, (*sz)*sizeof(unsigned int)); 
 	(*sz) *= 2;
 	return auxptr;
 }
 
 int main ( int argc, char *argv[] ) {
 
-	int send_socket, recv_socket;
+	int send_socket;
 	unsigned int i;
     char buf[BUFSIZ + 1];
 	struct sockaddr_in sa, isa;  /* sa: server, isa: client */
@@ -78,12 +78,12 @@ int main ( int argc, char *argv[] ) {
 	}		
 
 
-	char *received = malloc(sz * sizeof(char));
+	unsigned int *received = malloc(sz * sizeof(unsigned int));
 	if (!received){
 		puts ("Couldn't allocate array of received messages");
 		exit (ERROR_ALLOC);
 	}
-	memset(received, 0, sz*sizeof(char));
+	memset(received, 0, sz*sizeof(unsigned int));
 
 	struct timeval tv;
     tv.tv_sec = 5;
@@ -91,62 +91,82 @@ int main ( int argc, char *argv[] ) {
     setsockopt(send_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
 
-	unsigned int out_of_order = 0;
-	unsigned int expected_msg = 1;
-        memset(buf, 0, BUFSIZ);
-    while (1) {
-        int szisa = sizeof(isa); 
+    memset(buf, 0, BUFSIZ);
 
-        puts("Awaiting message.");
+	int timestamp = 1;
+	printf("Accepting messages...\n");
+    while (1) {
+        unsigned int szisa = sizeof(isa); 
+
         recvfrom(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, &szisa);
 		if (errno == EWOULDBLOCK){
 			printf("Server Timeout.\n");
 			break;
 		}
-        printf("I'm the server, just received a message ----> %s\n", buf);
 
 		// registra mensagem recebida
 		unsigned int num_message = atoi(buf);
 		while(num_message >= sz)
 			received = double_array_size(received, &sz);
-		received[num_message] = 1;
-
-		if (num_message < expected_msg){
-			printf("Out of order message! Message number %d came before message %d\n", num_message, expected_msg);
-			out_of_order++;
-		}
-		expected_msg = num_message+1;
-
-        // sendto(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, szisa);
+		received[num_message] = timestamp;
+	 	// printf("Timestamp: %d\n", timestamp);
+		timestamp++;
 	}
 
 	printf("========== FINAL REPORT ==========\n");
-	printf("-------- Missing Messages --------\n");
+	printf("+--------------------------------+\n");
+	printf("|        Missing Messages        |\n");
+	printf("+--------------------------------+\n");
 
 
-	unsigned int total = 0;
+	unsigned int total_received = 0;
 	unsigned int begin;
 	unsigned int highest = 0;
+	unsigned int out_of_order_cnt = 0;
 	i = 1;
 	while (i < sz){
-
 		if (!received[i]){
 			begin = i;
 			while (i < sz && !received[i])
 				i++;
 			if (i == sz) break;
-			printf("Interval [%d .. %d] missing\n", begin, i-1);
-		} else 
-			highest = i;		
-		total += received[i];
+			printf(" Interval [%d .. %d] missing\n", begin, i-1);
+		} else {
+			highest = i;
+			total_received++;
+		}
 		i++;
 	}
-	printf("Highest message received: %d\n", highest);
 	
 	printf("----------------------------------\n");
+	printf("\n");
+	printf("+--------------------------------+\n");
+	printf("|      Out of Order Messages     |\n");
+	printf("+--------------------------------+\n");
 
-	printf("I received a total of %d messages\n", total);
-	printf("Out of order messages: %d\n", out_of_order);
+	i = 0;
+	unsigned int last_ts = 0;
+	unsigned int last_msg = 0;
+	while (i < sz){
+		if (received[i]){
+			if (received[i] < last_ts)
+				printf(" %d came before %d\n", i, last_msg);
+
+			last_ts = received[i];
+			last_msg = i;
+		}
+		i++;
+	}
+	
+	printf("----------------------------------\n");
+	printf("\n");
+	
+
+	unsigned int lost = highest - total_received;
+	printf("Highest message:\t %6d\n", highest);
+	printf("Messages received:\t %6d (%.2f%%)\n", total_received, (float)(total_received*100)/highest);
+	printf("Messages lost:\t\t %6d (%.2f%%)\n", lost , (float)(lost*100)/highest);
+	printf("Out of order messages:\t %6d (%.2f%%)\n", out_of_order_cnt, (float)(out_of_order_cnt*100)/highest);
 
 	free(received);
 	return 0;
