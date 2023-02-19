@@ -131,9 +131,6 @@ int main ( int argc, char *argv[] ) {
 				i++;
 			if (i == sz) break;
 			printf(" Interval [%d .. %d] missing\n", begin, i-1);
-		} else {
-			highest = i;
-			total_received++;
 		}
 		i++;
 	}
@@ -155,6 +152,8 @@ int main ( int argc, char *argv[] ) {
 			last_ts = received[i];
 			last_msg = i;
 		}
+		highest = i;
+		total_received++;
 		i++;
 	}
 	
