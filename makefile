@@ -1,6 +1,7 @@
-CFLAGS=-Wall
+CFLAGS= -Wall
+CSV_FLAG= -DCSV_FORMAT
 
-all: client server
+all: client server server_csv
 
 client: client.c
 	gcc client.c -o client $(CFLAGS)
@@ -8,5 +9,8 @@ client: client.c
 server: server.c
 	gcc server.c -o server $(CFLAGS)
 
+server_csv: server.c
+	gcc server.c -o server_csv $(CSV_FLAG)
+
 clean:
-	rm -f server client
+	rm -f server client server_csv

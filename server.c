@@ -94,13 +94,13 @@ int main ( int argc, char *argv[] ) {
     memset(buf, 0, BUFSIZ);
 
 	int timestamp = 1;
-	printf("Accepting messages...\n");
+	fprintf(stderr, "Accepting messages...\n");
     while (1) {
         unsigned int szisa = sizeof(isa); 
 
         recvfrom(send_socket, buf, BUFSIZ, 0, (struct sockaddr *) &isa, &szisa);
 		if (errno == EWOULDBLOCK){
-			printf("Server Timeout.\n");
+			fprintf(stderr, "Server Timeout.\n");
 			break;
 		}
 
@@ -113,11 +113,12 @@ int main ( int argc, char *argv[] ) {
 		timestamp++;
 	}
 
+	#ifndef CSV_FORMAT
 	printf("========== FINAL REPORT ==========\n");
 	printf("+--------------------------------+\n");
 	printf("|        Missing Messages        |\n");
 	printf("+--------------------------------+\n");
-
+	#endif
 
 	unsigned int total_received = 0;
 	unsigned int begin;
@@ -130,24 +131,31 @@ int main ( int argc, char *argv[] ) {
 			while (i < sz && !received[i])
 				i++;
 			if (i == sz) break;
+			#ifndef CSV_FORMAT
 			printf(" Interval [%d .. %d] missing\n", begin, i-1);
+			#endif
 		}
 		i++;
 	}
 	
+	#ifndef CSV_FORMAT
 	printf("----------------------------------\n");
 	printf("\n");
 	printf("+--------------------------------+\n");
 	printf("|      Out of Order Messages     |\n");
 	printf("+--------------------------------+\n");
+	#endif
 
 	i = 0;
+	
 	unsigned int last_ts = 0;
 	unsigned int last_msg = 0;
 	while (i < sz){
 		if (received[i]){
+			#ifndef CSV_FORMAT
 			if (received[i] < last_ts)
 				printf(" %d came before %d\n", i, last_msg);
+			#endif
 
 			last_ts = received[i];
 			last_msg = i;
@@ -157,15 +165,20 @@ int main ( int argc, char *argv[] ) {
 		i++;
 	}
 	
-	printf("----------------------------------\n");
-	printf("\n");
-	
-
 	unsigned int lost = highest - total_received;
-	printf("Highest message:\t %6d\n", highest);
-	printf("Messages received:\t %6d (%.2f%%)\n", total_received, (float)(total_received*100)/highest);
-	printf("Messages lost:\t\t %6d (%.2f%%)\n", lost , (float)(lost*100)/highest);
-	printf("Out of order messages:\t %6d (%.2f%%)\n", out_of_order_cnt, (float)(out_of_order_cnt*100)/highest);
+
+	#ifndef CSV_FORMAT
+	fprintf(stderr, "----------------------------------\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "Highest message:\t %6d\n", highest);
+	fprintf(stderr, "Messages received:\t %6d (%.2f%%)\n", total_received, (float)(total_received*100)/highest);
+	fprintf(stderr, "Messages lost:\t\t %6d (%.2f%%)\n", lost , (float)(lost*100)/highest);
+	fprintf(stderr, "Out of order messages:\t %6d (%.2f%%)\n", out_of_order_cnt, (float)(out_of_order_cnt*100)/highest);
+	#endif
+
+	#ifdef CSV_FORMAT
+	printf("%d,%d,%d,%d\n", highest, total_received, lost, out_of_order_cnt);
+	#endif
 
 	free(received);
 	return 0;
