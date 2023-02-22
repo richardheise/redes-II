@@ -126,10 +126,10 @@ int main ( int argc, char *argv[] ) {
 
 	/* Registra cabeçalho do log de mensagens perdidas */
 	#ifndef CSV_FORMAT
-	printf("========== FINAL REPORT ==========\n");
-	printf("+--------------------------------+\n");
-	printf("|        Missing Messages        |\n");
-	printf("+--------------------------------+\n");
+	fprintf(stderr, "========== FINAL REPORT ==========\n");
+	fprintf(stderr, "+--------------------------------+\n");
+	fprintf(stderr, "|        Missing Messages        |\n");
+	fprintf(stderr, "+--------------------------------+\n");
 	#endif
 
 
@@ -148,7 +148,7 @@ int main ( int argc, char *argv[] ) {
 			if (i == sz) break;
             
 			#ifndef CSV_FORMAT
-			printf(" Interval [%d .. %d] missing\n", begin, i-1);
+			fprintf(stderr, " Interval [%d .. %d] missing\n", begin, i-1);
 			#endif
 		}
 		i++;
@@ -157,11 +157,11 @@ int main ( int argc, char *argv[] ) {
 
 	/* Registra cabeçalho do log de mensagens fora de ordem. */
 	#ifndef CSV_FORMAT
-	printf("----------------------------------\n");
-	printf("\n");
-	printf("+--------------------------------+\n");
-	printf("|      Out of Order Messages     |\n");
-	printf("+--------------------------------+\n");
+	fprintf(stderr, "----------------------------------\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "+--------------------------------+\n");
+	fprintf(stderr, "|      Out of Order Messages     |\n");
+	fprintf(stderr, "+--------------------------------+\n");
 	#endif
 
 	
@@ -181,7 +181,7 @@ int main ( int argc, char *argv[] ) {
             /* Caso haja timestamps decrescentes, reporta fora de ordem */
 			#ifndef CSV_FORMAT
 			if (received[i] < highest_ts)
-				printf(" %d came before %d\n", i, highest_msg);
+				fprintf(stderr, " %d came before %d\n", i, highest_msg);
 			#endif
 
             /* Registra maior mensagem, total de mensagens, maior timestamp e sua mensagem, */
