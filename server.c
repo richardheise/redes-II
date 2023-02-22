@@ -179,10 +179,12 @@ int main ( int argc, char *argv[] ) {
         
 		if (received[i]){
             /* Caso haja timestamps decrescentes, reporta fora de ordem */
-			#ifndef CSV_FORMAT
-			if (received[i] < highest_ts)
-				fprintf(stderr, " %d came before %d\n", i, highest_msg);
-			#endif
+			if (received[i] < highest_ts){
+                #ifndef CSV_FORMAT
+                fprintf(stderr, " %d came before %d\n", i, highest_msg);
+                #endif
+                out_of_order_cnt++;
+            }
 
             /* Registra maior mensagem, total de mensagens, maior timestamp e sua mensagem, */
             if (received[i] > highest_ts){
