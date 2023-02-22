@@ -19,10 +19,8 @@
 int main(int argc, char *argv[]) { 
 
     int socket_description;
-    // int number_recv_bytes;
     struct sockaddr_in sa;
     struct hostent *hp;
-    char buf[BUFSIZ+1];
     char *host;
 
     if(argc != 4) {
@@ -33,40 +31,37 @@ int main(int argc, char *argv[]) {
     host = argv[1];
     int num_message = atoi(argv[3]);
 
+    /* Procura a struct hostent correspondente ao host do argumento */
     if( (hp = gethostbyname(host)) == NULL ) {
       puts("Nao consegui obter endereco IP do servidor.");
       exit(ERROR_GETIP);
     }
 
+    /* Configura porta, endereço e tipo de endereço do host no socket. */
     bcopy( (char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length );
     sa.sin_family = hp->h_addrtype;
-
     sa.sin_port = htons(atoi(argv[2]));
 
+    /* Cria socket */
     if( (socket_description=socket(hp->h_addrtype, SOCK_DGRAM, 0)) < 0 ) {
       puts("Couldn't open socket.");
       exit(ERROR_OPENSCKT);
     }
 
+    /* Loop de envio de mensagens */
     char data[10] = {0};
-
     for (int i = 1; i <= num_message; i++) {
-        memset(buf, 0, BUFSIZ+1);
-
+        
+        /* Copia número de mensagem atual para string data e tenta enviar no socket. */
         sprintf(data, "%d ", i);
-
         if( sendto(socket_description, data, strlen(data)+1, 0, (struct
             sockaddr *) &sa, sizeof sa) != strlen(data)+1) {
             puts("Couldn't send data."); 
             exit(ERROR_SENDATA);
         }
 
-        // int szsa = sizeof(sa);
-        // int recvres = recvfrom(socket_description, buf, BUFSIZ, 0, (struct sockaddr *) &sa, &szsa);
-        // printf("I'm the client, just received %d, data: %s\n", recvres, buf);
     }
 
-   
     close(socket_description);
     return 0;
 }
