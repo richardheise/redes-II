@@ -1,0 +1,11 @@
+Para seção de Testes
+Todos os testes foram feitos nas máquinas h57 e h59 do departamento de informática da UFPR. A primeira foi usada para rodar o servidor e a outra para rodar o cliente.
+Cada teste consistiu em rodar o cliente com uma quantidade fixa de mensagens 100 vezes seguidas, enquanto o servidor rodava gerando a saída no formato CSV.
+Foram feitos testes com quatro quantidades diferentes de mensagens: 1.000, 10.000, 100.000 e 1.000.000. Para cada quantidade, foi gerado um CSV com 4 colunas: A maior mensagem recebida na execução, o total de mensagens recebidas, o total de mensagens perdidas (com base na maior mensagem) e o número de mensagens fora de ordem. 
+
+Para seção de Problemas Enfrentados
+Outra dificuldade que enfrentamos foi que o cálculo de mensagens perdidas feito pelo servidor não necessariamente é preciso, pois ele é feito com base na maior mensagem recebida ( [maior mensagem] - [numero de mensagens recebidas]). Caso a última mensagem recebida pelo servidor seja menor que a última mensagem enviada pelo cliente, o servidor irá contar menos mensagens perdidas que realmente foram. Nas planilhas com execuções individuais, o cálculo de mensagens perdidas ficou dessa forma, porém no cálculo das médias, foram considerados os números totais de mensagens enviadas.
+
+Para seção de Conclusões:
+[ Comentário: Coloquei isso aqui só pra mencionar a parte das mensagens fora de ordem na conclusão mesmo ]
+Como dito na seção de problemas enfrentados, não encontramos nenhuma mensagem fora de ordem de acordo com nossos critérios.

@@ -46,6 +46,7 @@ int main ( int argc, char *argv[] ) {
 
 	int send_socket;
 	unsigned int i;
+    unsigned int *received;
     char buf[BUFSIZ + 1];
 	struct sockaddr_in sa, isa;  /* sa: server, isa: client */
 	struct hostent *hp;
@@ -85,7 +86,7 @@ int main ( int argc, char *argv[] ) {
 	}		
 
 	/* Aloca vetor de mensagens recebidas e inicializa valores para 0 */
-	unsigned int *received = malloc(sz * sizeof(unsigned int));
+	received = malloc(sz * sizeof(unsigned int));
 	if (!received){
 		puts ("Couldn't allocate array of received messages");
 		exit (ERROR_ALLOC);
@@ -134,7 +135,6 @@ int main ( int argc, char *argv[] ) {
 
 	/* Registra no log todos os intervalos de mensagens não recebidas */
 	unsigned int begin;                 // Início de vacância de mensagens
-	unsigned int out_of_order_cnt = 0;  // Contador de mensagens fora de ordem
 	i = 1;
 	while (i < sz){
         
@@ -170,22 +170,25 @@ int main ( int argc, char *argv[] ) {
         Também conta mensagens recebidas e maior mensagem.
     */
 	i = 0;
+	unsigned int out_of_order_cnt = 0;  // Contador de mensagens fora de ordem
 	unsigned int total_received = 0;    // Total de mensagens recebidas
 	unsigned int highest = 0;           // Maior mensagem recebida
-	unsigned int last_ts = 0;           // Timestamp da mensagem anterior
-	unsigned int last_msg = 0;          // Numero da mensagem anterior
+	unsigned int highest_ts = 0;           // Timestamp da mensagem anterior
+	unsigned int highest_msg = 0;          // Numero da mensagem anterior
 	while (i < sz){
         
 		if (received[i]){
             /* Caso haja timestamps decrescentes, reporta fora de ordem */
 			#ifndef CSV_FORMAT
-			if (received[i] < last_ts)
-				printf(" %d came before %d\n", i, last_msg);
+			if (received[i] < highest_ts)
+				printf(" %d came before %d\n", i, highest_msg);
 			#endif
 
-            /* Registra últimos timestamp e mensagem, maior mensagem e total de mensagens*/
-			last_ts = received[i];
-			last_msg = i;
+            /* Registra maior mensagem, total de mensagens, maior timestamp e sua mensagem, */
+            if (received[i] > highest_ts){
+                highest_ts = received[i];
+                highest_msg = i;
+            }
 			highest = i;
 			total_received++;
 		}
